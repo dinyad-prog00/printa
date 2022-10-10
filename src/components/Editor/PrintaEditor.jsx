@@ -1,16 +1,39 @@
-import { minimalSetup, EditorView } from "codemirror"
-import { javascript } from "@codemirror/lang-javascript";
-import { css } from "@codemirror/lang-css";
-import { python } from "@codemirror/lang-python";
-import { html } from "@codemirror/lang-html";
+import { minimalSetup, basicSetup,EditorView } from "codemirror"
+import { EditorState} from "@codemirror/state";
+import {PrintaLanguages,languagesSelector, completionSelector} from "./languages"
 
-import {PrintaLanguages} from "./languages"
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { jsAutocompletion } from "../../completions/js";
+import { javaAutocompletion } from "../../completions/java";
+import { pythonAutocompletion } from "../../completions/python";
+
+var startState,view;
+
 
 
 const PrintEditor = () => {
     const [text, setText] = useState(undefined);
-    const [lang,setLang] = useState(undefined);
+    const editorRef = useRef()
+   
+
+    useEffect(()=>{
+
+         startState = EditorState.create({
+            doc: "Hello World",
+            extensions: [basicSetup]
+          })
+        
+        
+           view = new EditorView({
+            state : startState,
+            parent: editorRef.current
+        })
+
+        return ()=>{
+            view.destroy()
+        }
+    },[])
+    
     
 
     const handleFileNameChange = (name) => {
@@ -18,10 +41,14 @@ const PrintEditor = () => {
         const extension = name.substr(i + 1);
 
         if (extension in PrintaLanguages) {
-            setText(PrintaLanguages[extension])
+            setText(PrintaLanguages[extension]);
+            view.setState(EditorState.create({ doc: view.state.doc,extensions: [basicSetup,languagesSelector(extension)(),completionSelector(extension)]}))
+              
         }
         else {
             setText(undefined)
+            view.setState(EditorState.create({ doc: view.state.doc,extensions: [basicSetup]}))
+             
         }
 
     }
@@ -36,15 +63,14 @@ const PrintEditor = () => {
                 
             />
             <h2> Langage : {text && text} {!text && "Langage non reconnu"}</h2>
-        </div>
+       
+            <div ref={editorRef}>
+
+            </div>
+             </div>
     );
 }
 
 
-new EditorView({
-    
-    extensions: [minimalSetup, javascript()],
-    parent: document.body
-})
 
 export default PrintEditor;
