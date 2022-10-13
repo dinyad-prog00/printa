@@ -53,7 +53,7 @@ export const completionSelector = (ext)=>{
         return pythonAutocompletion;
     }
     else if(ext==='html'){
-        return null;
+        //return null;
     }
     else if(ext==='java'){
         return javaAutocompletion;

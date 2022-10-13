@@ -10,7 +10,8 @@ function javaCompletionSource(context) {
     return {
       from: word.from,
       options: [
-        ...keys
+        ...keys,
+        {label : 'toString', type : "keyword","apply" : 'String toString(){\n}'}
       ]
     }
   }
